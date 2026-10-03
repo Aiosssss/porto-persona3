@@ -2,6 +2,8 @@
 
 > Pixel-perfect, authentic recreation of **Persona 3 Reload's Pause Menu** built with pure HTML5, modern vanilla CSS3, and JavaScript (ES6+).
 
+🔗 **Live Website**: [https://aiosssss.github.io/porto-persona3/](https://aiosssss.github.io/porto-persona3/)
+
 ---
 
 ## 🌟 Highlights & Features
