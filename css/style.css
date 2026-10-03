@@ -1,0 +1,2156 @@
+/* ==========================================================================
+   PERSONA 3 RELOAD - PAUSE MENU & PORTFOLIO
+   Pure Vanilla HTML5 / CSS3 / ES6
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+
+/* --------------------------------------------------------------------------
+   Font Declarations
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Rodin Pro";
+  src: url("../fonts/Rodin Pro EB.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Rodin Pro Medium";
+  src: url("../fonts/Rodin Pro DB.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Rodin Pro Bold";
+  src: url("../fonts/Rodin Pro UB.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NewRodin Pro";
+  src: url("../fonts/NewRodin Pro DB.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NewRodin Pro UB";
+  src: url("../fonts/NewRodin Pro UB.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Skip Std B";
+  src: url("../fonts/Skip Std B.otf") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   Design Tokens & CSS Variables
+   -------------------------------------------------------------------------- */
+:root {
+  --color-fg: #ffffff;
+  --color-bg: #015fcc;
+  --color-bg-dark: #031f64;
+  --color-red: #ff0000;
+  --color-muted: rgba(255, 255, 255, 0.4);
+  --color-pink: #fd77d9;
+
+  --color-button-1: #16cffb;
+  --color-button-2: #7de6fd;
+  --color-button-3: #77fefc;
+
+  --color-border: #5d6a88;
+
+  --font-rodin: "Rodin Pro Bold", "Rodin Pro", sans-serif;
+  --font-rodin-medium: "Rodin Pro Medium", sans-serif;
+  --font-new-rodin: "NewRodin Pro", sans-serif;
+  --font-new-rodin-ub: "NewRodin Pro UB", "NewRodin Pro", sans-serif;
+  --font-skip: "Skip Std B", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+
+  --text-shadow-under: 0 1px 6px rgba(0, 0, 0, 0.5), 0 -1px 6px rgba(0, 0, 0, 0.5),
+    1px 0 6px rgba(0, 0, 0, 0.5), -1px 0 6px rgba(0, 0, 0, 0.5);
+  --shadow-under: 0 1px 6px rgba(0, 0, 0, 0.5), 0 -1px 6px rgba(0, 0, 0, 0.5),
+    1px 0 6px rgba(0, 0, 0, 0.5), -1px 0 6px rgba(0, 0, 0, 0.5);
+  --text-shadow-border:
+    0 2px 0 var(--color-border),
+    0 -2px 0 var(--color-border),
+    2px 0 0 var(--color-border),
+    -2px 0 0 var(--color-border),
+    -2px -2px 0 var(--color-border),
+    2px -2px 0 var(--color-border),
+    2px 2px 0 var(--color-border),
+    -2px 2px 0 var(--color-border),
+    0 1px 6px rgba(0, 0, 0, 0.5),
+    0 -1px 6px rgba(0, 0, 0, 0.5),
+    1px 0 6px rgba(0, 0, 0, 0.5),
+    -1px 0 6px rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   Reset & Base Styles
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #001233;
+  color: var(--color-fg);
+  font-family: var(--font-rodin);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Disable main menu interaction when project S.Link screen is active */
+body.project-screen-active #menu-column,
+body.project-screen-active .hud-controls,
+body.project-screen-active .controls-guide,
+body.project-screen-active .side-number {
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Small Screen Warning (identical to original)
+   -------------------------------------------------------------------------- */
+.mobile-warning {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg);
+  z-index: 1000;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  font-family: var(--font-skip);
+  font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 1023px) {
+  .mobile-warning {
+    display: flex;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Main Screen Container
+   -------------------------------------------------------------------------- */
+.p3r-main {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #001233;
+}
+
+/* --------------------------------------------------------------------------
+   Background Video (Intro & Seamless Looping)
+   Adapted for laptop screens:
+   - Anchored to bottom-left so Makoto and water surface never get cropped
+   - If aspect ratio doesn't fit vertically, crop strictly occurs at the TOP
+   - If aspect ratio fits, 100% of the video is displayed uncropped
+   -------------------------------------------------------------------------- */
+.background-video {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: left bottom;
+  pointer-events: none;
+  background-color: transparent;
+}
+
+@media (max-aspect-ratio: 16/9) {
+  .background-video {
+    width: 100vw;
+    height: calc(100vw * 9 / 16);
+    object-fit: contain;
+    object-position: left bottom;
+  }
+}
+
+.bg-video-intro {
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.bg-video-intro.fade-out {
+  opacity: 0;
+}
+
+.bg-video-loop {
+  z-index: 1;
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Persona 3 Reload - Bright Sea Blue Loading Screen
+   -------------------------------------------------------------------------- */
+.p3r-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: radial-gradient(circle at 85% 85%, #16cffb 0%, #0099ff 28%, #015fcc 62%, #003a8c 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 4rem 5rem;
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.p3r-loading-screen.dismissed {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+/* Background grid & ambient caustics lines */
+.p3r-loading-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+
+/* Bottom Loading HUD Cluster */
+.loading-hud-bottom {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  min-width: 28rem;
+  max-width: 90vw;
+}
+
+.loading-text-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+}
+
+.loading-title {
+  font-family: var(--font-rodin);
+  font-size: 3rem;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: #ffffff;
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.3), 0 0 25px rgba(22, 207, 251, 0.6);
+}
+
+.loading-dots span {
+  display: inline-block;
+  animation: p3DotBlink 1.4s infinite;
+  opacity: 0.25;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes p3DotBlink {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; color: #ffffff; }
+}
+
+/* Slanted Atlus Progress Bar */
+.loading-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.loading-track {
+  flex-grow: 1;
+  height: 0.85rem;
+  background: rgba(1, 31, 100, 0.75);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transform: skewX(-20deg);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.loading-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #16cffb, #ffffff);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+  position: relative;
+  transition: width 0.12s ease-out;
+}
+
+.loading-fill::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background-color: var(--color-red);
+  box-shadow: 0 0 8px var(--color-red);
+}
+
+.loading-percent {
+  font-family: var(--font-rodin);
+  font-size: 2.5rem;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #ffffff;
+  min-width: 5rem;
+  text-align: right;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 15px rgba(22, 207, 251, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Menu Column & Profile Header Layout (Shifted to the side)
+   -------------------------------------------------------------------------- */
+.menu-column {
+  position: absolute;
+  top: 67%;
+  transform: translateY(-50%);
+  left: 49rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+@media (min-width: 1800px) {
+  .menu-column {
+    left: 58rem;
+  }
+}
+
+@media (max-width: 1500px) {
+  .menu-column {
+    left: 43rem;
+  }
+}
+
+@media (max-width: 1350px) {
+  .menu-column {
+    left: 35rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .menu-column {
+    left: 26rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .menu-column {
+    left: 10rem;
+  }
+}
+
+@media (max-height: 860px) {
+  .menu-column {
+    transform: translateY(-50%) scale(0.85);
+    transform-origin: left center;
+  }
+}
+
+@media (max-height: 720px) {
+  .menu-column {
+    transform: translateY(-50%) scale(0.72);
+    transform-origin: left center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Persona 3 Reload - Profile Name Header ("ILHAM ZIQRI")
+   Non-interactive decorative player banner above the menu
+   -------------------------------------------------------------------------- */
+.menu-profile-header {
+  position: fixed;
+  top: 3.8vh;
+  right: 4.5vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transform: translateX(100px) skewX(-10deg);
+  z-index: 25;
+}
+
+.profile-name-text {
+  font-family: var(--font-rodin);
+  font-size: clamp(2.4rem, 2.8vw, 3.4rem);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 
+    0 3px 18px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(22, 207, 251, 0.75),
+    0 0 50px rgba(0, 153, 255, 0.5);
+}
+
+.profile-accent-line {
+  margin-top: 0.65rem;
+  height: 4px;
+  width: clamp(220px, 20vw, 320px);
+  background: linear-gradient(270deg, #16cffb 0%, #0099ff 70%, transparent 100%);
+  box-shadow: 0 0 12px rgba(22, 207, 251, 0.9), 0 0 24px rgba(0, 153, 255, 0.6);
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Options List Layout (Tighter Spacing & Entrance Animation)
+   -------------------------------------------------------------------------- */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+/* Stacking overlap between SVG items (closer together) */
+.option-item {
+  position: relative;
+  margin-top: -7.7rem; /* Closer vertical spacing */
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(110px) skewX(-8deg);
+  transition: z-index 0s linear;
+}
+
+.option-item:first-of-type {
+  margin-top: 0;
+}
+
+.option-item.selected {
+  z-index: 15 !important;
+}
+
+.option-hitbox {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 4.4rem;
+  outline: none;
+  pointer-events: auto;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  z-index: 10;
+}
+
+/* --------------------------------------------------------------------------
+   Entrance Animation on Menu Column (Cascading Stagger)
+   -------------------------------------------------------------------------- */
+.menu-profile-header.menu-entered,
+.menu-column.menu-entered .menu-profile-header {
+  animation: p3rMenuEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
+}
+
+.menu-column.menu-entered .option-item:nth-of-type(1) {
+  animation: p3rMenuEntrance 0.52s cubic-bezier(0.16, 1, 0.3, 1) 0.14s forwards;
+}
+
+.menu-column.menu-entered .option-item:nth-of-type(2) {
+  animation: p3rMenuEntrance 0.52s cubic-bezier(0.16, 1, 0.3, 1) 0.20s forwards;
+}
+
+.menu-column.menu-entered .option-item:nth-of-type(3) {
+  animation: p3rMenuEntrance 0.52s cubic-bezier(0.16, 1, 0.3, 1) 0.26s forwards;
+}
+
+.menu-column.menu-entered .option-item:nth-of-type(4) {
+  animation: p3rMenuEntrance 0.52s cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards;
+}
+
+@keyframes p3rMenuEntrance {
+  0% {
+    opacity: 0;
+    transform: translateX(120px) skewX(-12deg) scale(0.96);
+    filter: blur(4px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-8px) skewX(2deg) scale(1.02);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) skewX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.option-svg {
+  cursor: pointer;
+  outline: none;
+  pointer-events: none;
+  transform-origin: 25% center;
+  transition: transform 0.15s ease-out;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------------
+   SVG Option Item Text & Shapes Styling
+   -------------------------------------------------------------------------- */
+.option-text {
+  font-family: var(--font-rodin);
+  font-size: 4.8rem;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.14em;
+  transform-origin: 25% center;
+  transition: transform 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Cyan button colors when deselected */
+.fill-button-1 {
+  fill: var(--color-button-1);
+}
+.fill-button-2 {
+  fill: var(--color-button-2);
+}
+.fill-button-3 {
+  fill: var(--color-button-3);
+}
+
+.fill-pink {
+  fill: var(--color-pink);
+}
+
+.fill-red {
+  fill: var(--color-red);
+}
+
+.fill-fg {
+  fill: var(--color-fg);
+}
+
+/* Visibility toggles for selection */
+.option-item .selector-group {
+  display: none;
+}
+
+.option-item .masked-red-group {
+  display: none;
+}
+
+.option-item.selected .selector-group {
+  display: block;
+}
+
+.option-item.selected .masked-red-group {
+  display: block;
+}
+
+/* Bounce animation on select */
+.option-item.selected .option-text {
+  animation: p3TextBounce 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.3) forwards;
+}
+
+@keyframes p3TextBounce {
+  0% {
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+/* Persona 3 Pulse on Pink Selector background */
+.pulse-anim {
+  animation: p3SelectorPulse 0.9s infinite ease-in-out;
+}
+
+@keyframes p3SelectorPulse {
+  0%, 75% {
+    transform: scale(1);
+  }
+  85% {
+    transform: scale(1.06);
+  }
+  92%, 100% {
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Side Watermark Number (e.g., 01 - 09)
+   -------------------------------------------------------------------------- */
+.side-number {
+  position: absolute;
+  left: -4.5rem;
+  top: -18rem;
+  font-size: 37vh;
+  font-family: var(--font-rodin);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.2em;
+  color: var(--color-muted);
+  transform: rotate(90deg);
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom-Right Command & Controls HUD
+   -------------------------------------------------------------------------- */
+.hud-controls {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2.25rem;
+  z-index: 25;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.buttons-row {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.control-item {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.control-key {
+  border-radius: 9999px;
+  min-width: 1.85rem;
+  height: 1.55rem;
+  padding: 0 0.5rem;
+  font-family: var(--font-rodin), sans-serif;
+  font-weight: 900;
+  background-color: rgba(3, 31, 100, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  outline: 2px solid var(--color-border);
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  border: 2px solid var(--color-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-fg);
+  text-transform: uppercase;
+}
+
+.control-text {
+  text-shadow:
+    0 1px 0 var(--color-border),
+    0 -1px 0 var(--color-border),
+    1px 0 0 var(--color-border),
+    -1px 0 0 var(--color-border),
+    -1px -1px 0 var(--color-border),
+    1px -1px 0 var(--color-border),
+    1px 1px 0 var(--color-border),
+    -1px 1px 0 var(--color-border),
+    0 1px 4px rgba(0, 0, 0, 0.5);
+  font-size: 1.15rem;
+  font-family: var(--font-new-rodin), sans-serif;
+  letter-spacing: -0.02em;
+  font-style: italic;
+  font-weight: 800;
+  color: var(--color-fg);
+}
+
+/* --------------------------------------------------------------------------
+   Portfolio Modal (Persona 3 Glassmorphism HUD Style)
+   -------------------------------------------------------------------------- */
+.portfolio-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(3, 31, 100, 0.75);
+  backdrop-filter: blur(12px);
+  z-index: 300;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.portfolio-modal.active {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.portfolio-modal.circle-transitioning {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  will-change: clip-path;
+}
+
+.modal-card {
+  width: 58rem;
+  max-width: 90vw;
+  max-height: 85vh;
+  background: linear-gradient(135deg, rgba(1, 95, 204, 0.95), rgba(3, 31, 100, 0.98));
+  border: 3px solid var(--color-fg);
+  outline: 4px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(22, 207, 251, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portfolio-modal.active .modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  background-color: #ffffff;
+  color: var(--color-bg-dark);
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--color-red);
+}
+
+.modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modal-tag {
+  background-color: var(--color-red);
+  color: #ffffff;
+  font-family: var(--font-skip);
+  font-size: 1rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.25rem;
+  font-style: normal;
+  letter-spacing: 0.05em;
+}
+
+.modal-title {
+  font-size: 2.25rem;
+  font-family: var(--font-rodin);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.05em;
+  color: var(--color-bg-dark);
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: 2px solid var(--color-bg-dark);
+  border-radius: 9999px;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-rodin);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--color-bg-dark);
+  transition: all 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--color-red);
+  color: #ffffff;
+  border-color: var(--color-red);
+}
+
+.modal-body {
+  padding: 2.5rem;
+  overflow-y: auto;
+  font-family: var(--font-new-rodin);
+  color: #ffffff;
+  line-height: 1.6;
+}
+
+.modal-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.modal-info-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(22, 207, 251, 0.4);
+  border-left: 5px solid var(--color-button-1);
+  padding: 1.25rem;
+  border-radius: 0.375rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.modal-info-card:hover {
+  transform: translateY(-3px);
+  border-left-color: var(--color-pink);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.info-card-title {
+  font-family: var(--font-skip);
+  font-size: 1.25rem;
+  color: var(--color-button-2);
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.info-card-desc {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.modal-footer {
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* ==========================================================================
+   PERSONA 3 RELOAD - SOCIAL LINK PROJECT SCREEN
+   Exact 1:1 Layout recreation matching ATLUS S.Link List screen
+   ========================================================================== */
+.p3r-slink-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #001233;
+  display: none;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.p3r-slink-screen.active {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.p3r-slink-screen.circle-transitioning {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  will-change: clip-path;
+}
+
+/* Project Screen Animated Video Background (Makoto Wallpaper) */
+.slink-video-container {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.slink-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+}
+
+.slink-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 15, 40, 0.18) 0%, rgba(0, 15, 40, 0.04) 50%, rgba(0, 10, 30, 0.12) 100%);
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Clean Wavy Circle Page Transition
+   Pure GPU-accelerated clipPath wavy ripple reveal from menu text
+   -------------------------------------------------------------------------- */
+.wavy-transition-portal {
+  display: none !important;
+}
+
+/* Main Viewport Layer */
+.slink-viewport {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 4.2vh 0 4vh 0;
+  pointer-events: none;
+}
+
+/* Top-Left Dark Corner Wedge (Removed to match reference image) */
+.slink-top-left-wedge {
+  display: none !important;
+}
+
+/* Left Column: PROJECT Header + Cards Stack */
+.slink-left-column {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 60vw;
+  z-index: 10;
+}
+
+/* Profile Sub-header above PROJECT (Matching Atlus P3R Screenshot) */
+.slink-profile-header {
+  margin-left: 5.0vw;
+  margin-top: 2.8vh;
+  margin-bottom: 3.2vh; /* Generous breathing room between name and PROJECT */
+  user-select: none;
+  pointer-events: none;
+}
+
+.slink-profile-name {
+  font-family: var(--font-rodin), var(--font-expressway), sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.25rem);
+  font-weight: 700;
+  font-style: italic;
+  color: #7de6fd;
+  letter-spacing: 0.22em;
+  line-height: 1.2;
+}
+
+#skill-page .slink-profile-name {
+  color: #2a313d; /* Hitam muda / soft dark charcoal per user request */
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+/* ==========================================================================
+   Persona 3 Reload Shattered Geometric Header (Full-Bleed to Screen Left Edge)
+   ========================================================================== */
+.p3r-geometric-header {
+  position: relative;
+  width: clamp(620px, 45vw, 820px);
+  height: clamp(102px, 12vh, 124px);
+  margin-top: 0;
+  margin-bottom: clamp(26px, 3.4vh, 38px);
+  overflow: visible;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  transform: rotate(-4.2deg);
+  transform-origin: left center;
+  cursor: default;
+  user-select: none;
+}
+
+/* Page Open Entrance Animation */
+.p3r-geometric-header.animating,
+.p3r-slink-screen.circle-transitioning .p3r-geometric-header,
+.p3r-slink-screen.active .p3r-geometric-header {
+  animation: p3rBannerSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes p3rBannerSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-150px) rotate(-4.2deg);
+    filter: blur(8px);
+  }
+  68% {
+    opacity: 1;
+    transform: translateX(12px) rotate(-4.2deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotate(-4.2deg);
+    filter: blur(0);
+  }
+}
+
+/* Solid Light-Blue Hard Shadow Band Behind PROJECT Banner */
+.p3r-shard-back-band {
+  position: absolute;
+  left: -106px;
+  top: -8px;
+  width: calc(100% + 120px);
+  height: 100%;
+  background: #16cffb; /* Solid Light Blue (Persona 3 Reload Cyan) */
+  clip-path: polygon(0 0, 50% 10%, 53% 0%, 100% 0%, calc(100% - 48px) 100%, 0 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Secondary decorative shards hidden to preserve pure solid light-blue shadow */
+.p3r-shard-cyan-peak,
+.p3r-shard-right-cyan,
+.p3r-shard-float {
+  display: none !important;
+}
+
+/* Main Dark Midnight Blue Razor-Cut Banner (Extending all the way from screen left edge!) */
+.p3r-header-slash-main {
+  position: absolute;
+  left: -120px;
+  top: 0;
+  width: calc(100% + 120px);
+  height: 100%;
+  background: linear-gradient(90deg, #020914 0%, #041224 55%, #061c3b 100%);
+  clip-path: polygon(0 0, 50% 10%, 53% 0%, 100% 0%, calc(100% - 48px) 100%, 0 100%);
+  z-index: 2;
+  box-shadow: 0 6px 28px rgba(0, 5, 18, 0.85);
+}
+
+/* Bold Crisp Pure White Persona 3 Reload Title - Matching Menu Utama Font & Slant */
+.p3r-banner-title {
+  position: relative;
+  z-index: 3;
+  margin-left: 5.0vw;
+  font-family: var(--font-rodin), sans-serif;
+  font-size: clamp(4.0rem, 4.8vw, 5.2rem);
+  font-style: italic;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  text-shadow: none;
+  transform: skewX(-14deg);
+  display: inline-block;
+  user-select: none;
+  padding-top: 10px;
+}
+
+/* ==========================================================================
+   Cards Stack (Collinear Parallel Slanted Layout: -22deg matching Screenshot)
+   ========================================================================== */
+.slink-cards-container {
+  margin-left: 5.0vw;
+  --slink-skew: -22deg;
+  --card-height: clamp(70px, 9.0vh, 84px);
+  --card-gap: clamp(10px, 1.4vh, 15px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+  width: fit-content;
+  position: relative;
+}
+
+/* All cards share the EXACT SAME uniform slant (-22deg) with subtle staircase offset */
+.slink-card {
+  --card-skew: -22deg;
+  --card-unskew: 22deg;
+  --card-offset-x: 0px;
+  width: clamp(580px, 51.5vw, 760px);
+  height: var(--card-height);
+  transform: skewX(var(--card-skew)) translateX(0px);
+  margin-left: calc(var(--card-idx, 0) * 0.45vw);
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  user-select: none;
+  text-align: left;
+
+  /* Staggered non-simultaneous entrance animation */
+  animation: slinkCardSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slink-card:nth-child(1) { --card-delay: 0ms;   animation-delay: calc(var(--card-delay) + 90ms); }
+.slink-card:nth-child(2) { --card-delay: 50ms;  animation-delay: calc(var(--card-delay) + 90ms); }
+.slink-card:nth-child(3) { --card-delay: 100ms; animation-delay: calc(var(--card-delay) + 90ms); }
+.slink-card:nth-child(4) { --card-delay: 150ms; animation-delay: calc(var(--card-delay) + 90ms); }
+.slink-card:nth-child(5) { --card-delay: 200ms; animation-delay: calc(var(--card-delay) + 90ms); }
+
+@keyframes slinkCardSlideIn {
+  0% {
+    opacity: 0;
+    transform: skewX(var(--card-skew, -22deg)) translateX(-140px);
+    filter: blur(5px);
+  }
+  70% {
+    opacity: 1;
+    transform: skewX(var(--card-skew, -22deg)) translateX(10px);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: skewX(var(--card-skew, -22deg)) translateX(0px);
+    filter: blur(0);
+  }
+}
+
+.slink-card:hover:not(.active) {
+  transform: skewX(var(--card-skew)) translateX(8px);
+  filter: drop-shadow(0 2px 12px rgba(0, 160, 255, 0.35));
+}
+
+.slink-card.active {
+  width: clamp(620px, 55.5vw, 810px) !important;
+  transform: skewX(var(--card-skew)) translateX(16px) !important;
+  z-index: 10;
+  filter: drop-shadow(0 6px 24px rgba(0, 160, 255, 0.45));
+}
+
+/* Unified Flex Row */
+.card-unified-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Sharp Solid Box for Roman Numeral */
+.card-numeral-box {
+  width: clamp(66px, 5.0vw, 82px);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #041630;
+  border-right: 1.5px solid rgba(0, 210, 255, 0.45);
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.slink-card.active .card-numeral-box {
+  background: #041630 !important;
+  border-right: 2px solid rgba(0, 20, 60, 0.2) !important;
+}
+
+.card-numeral-text {
+  font-family: var(--font-rodin), var(--font-skip), sans-serif;
+  font-size: clamp(1.65rem, 1.9vw, 2.2rem);
+  font-weight: 900;
+  font-style: italic;
+  transform: skewX(var(--card-unskew));
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+/* Unified Main Body: Title & Caption */
+.card-main-body {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 2.2rem 0 1.8rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #00549c 0%, #004282 100%);
+  border-top: 1.5px solid rgba(110, 215, 255, 0.5);
+  border-right: 2.5px solid rgba(0, 210, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 30, 70, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 20, 60, 0.35);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.slink-card.active .card-main-body {
+  background: linear-gradient(90deg, #ffffff 0%, #f4f9ff 100%) !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  box-shadow: 0 4px 18px rgba(0, 20, 60, 0.25) !important;
+}
+
+/* Project Title Text - Now using Skip Std B as requested */
+.card-title-text {
+  font-family: var(--font-skip), sans-serif;
+  font-weight: bold;
+  font-style: italic;
+  font-size: clamp(1.4rem, 1.6vw, 1.78rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  transform: skewX(var(--card-unskew));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 15, 45, 0.6);
+  transition: color 0.2s ease;
+}
+
+.slink-card.active .card-title-text {
+  color: #061a35 !important;
+  text-shadow: none !important;
+}
+
+/* Subtitle / Caption Text */
+.card-subtitle-text {
+  font-family: var(--font-rodin-medium), var(--font-new-rodin), sans-serif;
+  font-weight: 600;
+  font-style: italic;
+  font-size: clamp(0.9rem, 1.0vw, 1.12rem);
+  line-height: 1.2;
+  transform: skewX(var(--card-unskew));
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #8ee6ff;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+}
+
+.slink-card.active .card-subtitle-text {
+  color: #244b79 !important;
+}
+
+/* Red Accent Stripe on Right when Active */
+.card-red-accent {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  background: #e60024;
+  clip-path: polygon(42% 0, 100% 0, 100% 100%, 0% 100%);
+  z-index: 5;
+}
+
+.slink-card.active .card-red-accent {
+  display: block;
+}
+
+/* Bottom-Left Corner White Accent Wedge (Removed to match screenshot) */
+.slink-corner-triangle {
+  display: none !important;
+}
+
+/* Bottom Right HUD: Controls matching Menu Utama */
+.slink-bottom-hud {
+  position: absolute;
+  right: 2.5rem;
+  bottom: 2rem;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 25;
+}
+
+.slink-hud-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.15s ease;
+}
+
+.control-key svg {
+  display: block;
+}
+
+.slink-hud-btn:hover {
+  transform: scale(1.08);
+}
+
+/* Responsive Scaling for Smaller Heights */
+@media (max-height: 720px) {
+  .slink-viewport {
+    padding: 3.5vh 0 2.5vh 4.5vw;
+  }
+  .p3r-banner-title {
+    font-size: clamp(2.6rem, 3.6vw, 3.2rem);
+  }
+  .slink-card {
+    height: 50px;
+    width: clamp(420px, 42vw, 540px);
+  }
+  .card-title-text {
+    font-size: 1.15rem;
+  }
+  .card-subtitle-text {
+    font-size: 0.72rem;
+  }
+}
+
+/* ==========================================================================
+   PERSONA 3 RELOAD - SKILLS STATS PAGE
+   Adapted from porto-persona5 Stats Skill concept with authentic P3R aesthetic
+   ========================================================================== */
+/* .p3r-skill-screen inherits base layout from .p3r-slink-screen */
+
+body.skill-screen-active .menu-options-container,
+body.skill-screen-active .clock-hud,
+body.skill-screen-active .character-viewport,
+body.about-screen-active .menu-options-container,
+body.about-screen-active .clock-hud,
+body.about-screen-active .character-viewport {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* .p3r-skill-viewport aligns with .slink-viewport */
+
+.p3r-skill-left-column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 92vw;
+  pointer-events: auto;
+}
+
+/* Category Filter Tabs (P3R Slanted Aesthetic) */
+.p3r-skill-tabs {
+  margin-left: 5.0vw;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  z-index: 10;
+  position: relative;
+  pointer-events: auto;
+}
+
+.p3r-skill-tab {
+  transform: skewX(-14deg);
+  background: rgba(2, 11, 24, 0.88);
+  border: 1.5px solid rgba(22, 207, 251, 0.45);
+  padding: 7px 18px;
+  color: #a0d8ef;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  outline: none;
+}
+
+.p3r-tab-tag {
+  display: inline-block;
+  transform: skewX(14deg);
+  color: #16cffb;
+  font-family: var(--font-new-rodin-ub), sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.p3r-tab-label {
+  display: inline-block;
+  transform: skewX(14deg);
+  color: #e0f6ff;
+  font-family: var(--font-new-rodin-ub), sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+}
+
+.p3r-skill-tab:hover {
+  background: rgba(22, 207, 251, 0.22);
+  border-color: #16cffb;
+  transform: skewX(-14deg) translateY(-2px);
+  box-shadow: 0 4px 14px rgba(22, 207, 251, 0.35);
+}
+
+.p3r-skill-tab.active {
+  background: linear-gradient(90deg, #004fb3 0%, #16cffb 100%);
+  border-color: #ffffff;
+  transform: skewX(-14deg) translateY(-2px);
+  box-shadow: 0 0 16px rgba(22, 207, 251, 0.65), 3px 3px 0 #000;
+}
+
+.p3r-skill-tab.active .p3r-tab-tag {
+  color: #020914;
+  background: #ffffff;
+  padding: 0 5px;
+  border-radius: 2px;
+}
+
+.p3r-skill-tab.active .p3r-tab-label {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* Skills Stats Container (Single Category Focused Layout) */
+.p3r-skills-container {
+  margin-left: 5.0vw;
+  width: min(88vw, 1100px);
+  max-height: calc(100vh - 270px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 24px;
+  padding-bottom: 45px;
+  scrollbar-width: thin;
+  scrollbar-color: #16cffb rgba(2, 11, 24, 0.6);
+  pointer-events: auto;
+}
+
+.p3r-skills-container::-webkit-scrollbar {
+  width: 6px;
+}
+.p3r-skills-container::-webkit-scrollbar-track {
+  background: rgba(2, 11, 24, 0.6);
+}
+.p3r-skills-container::-webkit-scrollbar-thumb {
+  background: #16cffb;
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(22, 207, 251, 0.8);
+}
+
+/* Skill Group Section */
+.p3r-skill-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.p3r-skill-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  user-select: none;
+}
+
+.p3r-group-badge {
+  background: #16cffb;
+  color: #020914;
+  font-family: var(--font-new-rodin-ub), sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.9rem;
+  padding: 3px 8px;
+  transform: skewX(-14deg);
+  display: inline-block;
+  letter-spacing: 0.05em;
+}
+
+.p3r-group-title {
+  font-family: var(--font-new-rodin-ub), sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(1.15rem, 1.35vw, 1.45rem);
+  color: #ffffff;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.95);
+}
+
+.p3r-group-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, #16cffb 0%, rgba(22, 207, 251, 0.3) 60%, transparent 100%);
+}
+
+.p3r-skill-rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual Stat Skill Row (Staggered Animation Entrance) */
+.p3r-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 10px 20px;
+  background: rgba(2, 9, 20, 0.82);
+  border-left: 4px solid #16cffb;
+  border-bottom: 1px solid rgba(22, 207, 251, 0.18);
+  transform: skewX(-14deg);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-left-color 0.2s ease;
+  user-select: none;
+  animation: p3rSkillRowIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes p3rSkillRowIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(-35px, 0, 0) skewX(-14deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(3px, 0, 0) skewX(-14deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) skewX(-14deg);
+  }
+}
+
+.p3r-stat-row:hover {
+  background: rgba(0, 32, 74, 0.94);
+  border-left-color: #ffffff;
+  transform: skewX(-14deg) translateX(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+.p3r-stat-name-col {
+  width: clamp(280px, 24vw, 410px);
+  flex-shrink: 0;
+  transform: skewX(14deg); /* Unskew text for crisp readability */
+  overflow: hidden;
+}
+
+.p3r-stat-name {
+  font-family: var(--font-skip), sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.02rem, 1.12vw, 1.22rem);
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.95);
+}
+
+/* Slanted Brilliant White Progress Bar (Indikator Putih Solid - Tanpa Glowing) */
+.p3r-stat-bar-track {
+  flex: 1;
+  height: 20px;
+  background: rgba(2, 12, 28, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+  transform: skewX(-8deg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+  background-image: repeating-linear-gradient(90deg, transparent 0 22px, rgba(255, 255, 255, 0.12) 22px 24px);
+}
+
+.p3r-stat-bar-fill {
+  position: absolute;
+  inset: 0;
+  background: #ffffff; /* Indikator Berwarna Putih Murni Bersih Tanpa Glowing */
+  background-image: repeating-linear-gradient(90deg, transparent 0 22px, rgba(22, 207, 251, 0.45) 22px 25px);
+  box-shadow: none !important; /* Glowing Dihilangkan Sesuai Permintaan */
+  transition: none !important;
+}
+
+.p3r-stat-bar-tip {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: #e60024;
+  box-shadow: none !important; /* Glowing Dihilangkan Sesuai Permintaan */
+}
+
+/* Level Indicator Dihilangkan Sesuai Permintaan */
+.p3r-stat-lv {
+  display: none !important;
+}
+
+/* ==========================================================================
+   PERSONA 3 RELOAD - ABOUT ME PAGE
+   Simple Left-Docked Layout with Photo Frame Placeholder & Developer Bio
+   ========================================================================== */
+/* .p3r-about-screen & .p3r-about-viewport inherit layout from .p3r-slink-screen & .slink-viewport */
+
+.p3r-about-left-column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: min(760px, 58vw);
+  pointer-events: auto;
+}
+
+/* Left-Docked About Card (Larger, Solid Deep Black, No Transparency, No Blue Line) */
+.p3r-about-card {
+  margin-left: 5vw;
+  width: min(720px, 56vw);
+  background: #090d14; /* 100% Solid Deep Black - Tanpa Transparansi */
+  border: 1px solid #1c2433;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.96);
+  padding: 34px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+  position: relative;
+  pointer-events: auto;
+  user-select: text;
+}
+
+.p3r-about-card,
+.p3r-about-card * {
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.p3r-about-card::before {
+  display: none; /* Hilangkan segitiga biru di pojok */
+}
+
+.p3r-about-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Top Section: Photo + Identity */
+.p3r-about-top-row {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+/* User Profile Photo Box */
+.p3r-photo-box {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #2d3748;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  background: #0d121c;
+}
+
+.p3r-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Identity Details */
+.p3r-about-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.p3r-about-name {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.85rem, 2.3vw, 2.45rem);
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.p3r-about-school {
+  display: none !important; /* Dihilangkan sesuai permintaan user */
+}
+
+.p3r-about-title {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 500;
+  color: #94a3b8;
+  font-size: 1.05rem;
+  margin-top: 3px;
+}
+
+/* Divider Line Dihilangkan Sesuai Permintaan */
+.p3r-about-line {
+  display: none !important;
+}
+
+/* Bio Text */
+.p3r-about-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  line-height: 1.68;
+}
+
+.p3r-about-p {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: clamp(0.96rem, 1.06vw, 1.06rem);
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.p3r-about-p strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.p3r-about-p em {
+  color: #f1f5f9;
+  font-style: italic;
+}
+
+/* Inspiring Quote Box (Solid Charcoal, No Blue Lines) */
+.p3r-about-quote {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: #111722; /* Solid dark charcoal - tanpa transparansi */
+  border-left: 3px solid #334155; /* Soft gray border - tanpa garis biru */
+  padding: 16px 22px;
+  border-radius: 0 6px 6px 0;
+  margin-top: 4px;
+}
+
+.p3r-quote-mark {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 2.0rem;
+  line-height: 1;
+  color: #94a3b8; /* Muted gray - tanpa biru */
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.p3r-quote-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.p3r-quote-text {
+  margin: 0;
+  font-family: var(--font-poppins), sans-serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+  line-height: 1.5;
+}
+
+.p3r-quote-author {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+/* Responsive adjustment for small screen heights */
+@media (max-height: 720px) {
+  .p3r-about-card {
+    padding: 16px 22px;
+    width: min(540px, 46vw);
+    gap: 12px;
+  }
+  .p3r-photo-box {
+    width: 85px;
+    height: 85px;
+  }
+  .p3r-about-card-inner {
+    gap: 10px;
+  }
+  .p3r-about-bio {
+    gap: 8px;
+  }
+  .p3r-about-p {
+    font-size: 0.85rem;
+  }
+  .p3r-quote-text {
+    font-size: 0.82rem;
+  }
+}
+
+/* ==========================================================================
+   PERSONA 3 RELOAD - CONTACT SCREEN (MAIL / Phone UI Style)
+   ========================================================================== */
+:root {
+  --mail-skew: -12.5deg;
+  --mail-rot: -1.6deg;
+}
+
+/* .p3r-contact-screen inherits base layout from .p3r-slink-screen */
+
+.p3r-contact-overlay {
+  background: radial-gradient(circle at 65% 45%, rgba(2, 12, 30, 0.4) 0%, rgba(1, 6, 16, 0.88) 100%);
+}
+
+.p3r-contact-viewport {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: clamp(10px, 2.5vw, 40px);
+  position: relative;
+  z-index: 10;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Slanted Message Phone Pad Wrapper - Large size matching P3R reference */
+.p3r-mail-phone-wrap {
+  position: relative;
+  width: clamp(760px, 50vw, 980px);
+  height: clamp(750px, 85vh, 890px);
+  transform: skewX(var(--mail-skew)) rotate(var(--mail-rot));
+  transform-origin: left bottom;
+  user-select: none;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SVG Chassis Background: Distinct White Linear Frame & Extended Black Body */
+.p3r-mail-chassis-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Phone Card Contents Area inside the White Linear Frame */
+.p3r-mail-phone-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  padding: 34px 42px 38px 36px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header with prominent MAIL watermark */
+.p3r-mail-header-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+  height: 82px;
+}
+
+.p3r-mail-watermark {
+  font-family: var(--font-rodin), sans-serif;
+  font-size: clamp(5.6rem, 6.5vw, 7.6rem);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.05em;
+  color: #ffffff; /* Lebih Putih Bersih Sesuai Permintaan */
+  line-height: 0.9;
+  pointer-events: none;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9), 0 6px 18px rgba(0, 0, 0, 0.95);
+  user-select: none;
+  transform: translateY(4px);
+}
+
+/* List Container for Contact Rows */
+.p3r-mail-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 1.8vh, 18px);
+  position: relative;
+  padding-right: 28px;
+  margin-top: 4px;
+}
+
+/* Individual Mail Card Row - Taller, Larger like reference */
+.p3r-mail-row {
+  display: flex;
+  height: clamp(94px, 10.4vh, 110px);
+  background: #111724;
+  border: 1.5px solid #1f2c40;
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+/* Slanted Left Icon Block - Wide diagonal cut */
+.p3r-mail-icon-block {
+  width: 140px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  clip-path: polygon(0 0, 100% 0, 75% 100%, 0 100%);
+  transition: transform 0.2s ease;
+}
+
+.p3r-mail-gmail {
+  background: #ea4335;
+  color: #ffffff;
+}
+
+.p3r-mail-github {
+  background: #24292e;
+  color: #ffffff;
+}
+
+.p3r-mail-tiktok {
+  background: #010101;
+  color: #00f2fe;
+}
+
+.p3r-mail-instagram {
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: #ffffff;
+}
+
+.p3r-mail-linkedin {
+  background: #0a66c2;
+  color: #ffffff;
+}
+
+/* Right Content Area */
+.p3r-mail-content-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 24px 8px 16px;
+  overflow: hidden;
+}
+
+.p3r-mail-sender-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #8fa2bd;
+  font-family: var(--font-skip), sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.18rem;
+  line-height: 1;
+  transition: color 0.18s ease;
+}
+
+.p3r-mail-env-icon {
+  flex-shrink: 0;
+  transition: color 0.18s ease;
+}
+
+.p3r-mail-sender-name {
+  letter-spacing: 0.02em;
+}
+
+.p3r-mail-row-line {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 7px 0 6px 0;
+  transition: background 0.18s ease;
+}
+
+.p3r-mail-msg-text {
+  font-family: var(--font-skip), sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.38rem;
+  color: #f1f5f9;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.18s ease;
+}
+
+/* Hover & Active State - Solid White, Tanpa Glowing Biru */
+.p3r-mail-row:hover,
+.p3r-mail-row.active {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5) !important; /* Glowing Biru Dihilangkan Total */
+  transform: translateX(10px);
+}
+
+.p3r-mail-row:hover .p3r-mail-sender-row,
+.p3r-mail-row.active .p3r-mail-sender-row {
+  color: #0c182b !important; /* Teks Hitam Pekat Persona, Bukan Biru Glowing */
+}
+
+.p3r-mail-row:hover .p3r-mail-env-icon,
+.p3r-mail-row.active .p3r-mail-env-icon {
+  color: #ea4335 !important; /* Ikon Amplop Merah Gmail */
+}
+
+.p3r-mail-row:hover .p3r-mail-row-line,
+.p3r-mail-row.active .p3r-mail-row-line {
+  background: rgba(0, 0, 0, 0.18) !important; /* Garis Pemisah Abu Gelap Bersih */
+}
+
+.p3r-mail-row:hover .p3r-mail-msg-text,
+.p3r-mail-row.active .p3r-mail-msg-text {
+  color: #061122 !important;
+  font-weight: 900;
+}
+
+/* Vertical Scrollbar Dihilangkan Sesuai Permintaan (Garis Putih Hitam di Samping List) */
+.p3r-mail-scrollbar-track {
+  display: none !important;
+}
+
+.p3r-mail-scrollbar-thumb {
+  display: none !important;
+}
+
+/* Empty Slots Styling (Kosong) */
+.p3r-mail-row-empty {
+  opacity: 0.28;
+  cursor: default;
+  pointer-events: none;
+  background: rgba(12, 17, 26, 0.5) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.p3r-mail-empty-icon {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.p3r-mail-empty-text {
+  color: #485c78 !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+}
+
+/* Bottom Left HUD: ESC Close Button moved to Bottom-Left Corner per user request */
+.p3r-contact-bottom-hud {
+  position: fixed;
+  bottom: 3.5vh;
+  left: 3vw;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+/* Hide phone pad while circle transition is still expanding */
+.p3r-contact-screen:not(.active) .p3r-mail-phone-wrap,
+.p3r-contact-screen.circle-transitioning .p3r-mail-phone-wrap {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Persona 3 Reload Slide + Rotate Right (Berputar ke Kanan) Entrance Animation
+   Dipercepat sedikit (0.78s) dan dioptimalkan hardware acceleration translate3d tanpa patah-patah */
+@keyframes p3rMailPhoneSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(-300px, 0, 0) skewX(var(--mail-skew)) rotate(-15deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  74% {
+    transform: translate3d(12px, 0, 0) skewX(var(--mail-skew)) rotate(0.6deg);
+  }
+  88% {
+    transform: translate3d(-3px, 0, 0) skewX(var(--mail-skew)) rotate(-2.2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) skewX(var(--mail-skew)) rotate(var(--mail-rot));
+  }
+}
+
+.p3r-contact-screen.active .p3r-mail-phone-wrap {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  animation: p3rMailPhoneSlideIn 0.78s cubic-bezier(0.16, 0.95, 0.26, 1) forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ==========================================================================
+   GLOBAL SIDE VIGNETTE (Hitam Pudar di Samping Samping Website di Setiap Page)
+   ========================================================================== */
+.p3r-global-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 22;
+  background: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 3.5%, transparent 12%, transparent 88%, rgba(0, 0, 0, 0.25) 96.5%, rgba(0, 0, 0, 0.6) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 5%, transparent 95%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+
+
+
