@@ -709,11 +709,11 @@ function getExitOrigin(buttonElOrId, fallbackX, fallbackY) {
   };
 }
 
-// Named Aliases for Backward Compatibility & Direct Script Control (Updated for centered menu)
-const getProjectOptionCenter = (evt) => getOptionCenter(0, evt, 0.58, 0.38);
-const getSkillOptionCenter   = (evt) => getOptionCenter(1, evt, 0.56, 0.48);
-const getAboutOptionCenter   = (evt) => getOptionCenter(2, evt, 0.55, 0.57);
-const getContactOptionCenter = (evt) => getOptionCenter(3, evt, 0.54, 0.66);
+// Named Aliases for Backward Compatibility & Direct Script Control (Updated for menu layout)
+const getProjectOptionCenter = (evt) => getOptionCenter(0, evt, 0.62, 0.38);
+const getSkillOptionCenter   = (evt) => getOptionCenter(1, evt, 0.60, 0.48);
+const getAboutOptionCenter   = (evt) => getOptionCenter(2, evt, 0.58, 0.57);
+const getContactOptionCenter = (evt) => getOptionCenter(3, evt, 0.57, 0.66);
 
 const getProjectExitOrigin = () => getExitOrigin(slinkBackBtn, window.innerWidth - 120, window.innerHeight - 55);
 const getSkillExitOrigin   = () => getExitOrigin(skillBackBtn, window.innerWidth - 120, window.innerHeight - 55);

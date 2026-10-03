@@ -352,7 +352,7 @@ body.project-screen-active .side-number {
   position: absolute;
   top: 55%;
   transform: translateY(-50%);
-  left: 38rem;
+  left: 44rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -364,31 +364,31 @@ body.project-screen-active .side-number {
 
 @media (min-width: 1800px) {
   .menu-column {
-    left: 46rem;
+    left: 52rem;
   }
 }
 
 @media (max-width: 1500px) {
   .menu-column {
-    left: 33rem;
+    left: 38rem;
   }
 }
 
 @media (max-width: 1350px) {
   .menu-column {
-    left: 26rem;
+    left: 31rem;
   }
 }
 
 @media (max-width: 1100px) {
   .menu-column {
-    left: 18rem;
+    left: 22rem;
   }
 }
 
 @media (max-width: 900px) {
   .menu-column {
-    left: 6rem;
+    left: 8rem;
   }
 }
 
