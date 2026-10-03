@@ -358,7 +358,9 @@ async function loadAudioBuffers() {
     }
   } catch (_) {}
 }
-loadAudioBuffers();
+if (window.innerWidth >= 1024) {
+  loadAudioBuffers();
+}
 
 // Clean unified audio playback dispatcher
 function playAudioChannel({
@@ -1297,6 +1299,7 @@ function switchToLoopVideo() {
   hasSwitchedToLoop = true;
 
   if (bgVideoLoop) {
+    if (bgVideoLoop.preload !== "auto") bgVideoLoop.preload = "auto";
     bgVideoLoop.currentTime = 0;
     const playPromise = bgVideoLoop.play();
     if (playPromise !== undefined) {
@@ -1325,6 +1328,11 @@ if (bgVideoIntro) {
   bgVideoIntro.addEventListener("error", switchToLoopVideo);
   bgVideoIntro.addEventListener("timeupdate", () => {
     if (!hasSwitchedToLoop && bgVideoIntro.duration > 0) {
+      if (bgVideoIntro.currentTime >= bgVideoIntro.duration * 0.4) {
+        if (bgVideoLoop && bgVideoLoop.preload !== "auto") {
+          bgVideoLoop.preload = "auto";
+        }
+      }
       if (bgVideoIntro.currentTime >= bgVideoIntro.duration - 0.08) {
         switchToLoopVideo();
       }
@@ -1430,6 +1438,7 @@ function enterExperience() {
   if (menuProfileHeader) menuProfileHeader.classList.add("menu-entered");
 
   if (bgVideoIntro) {
+    if (bgVideoIntro.preload !== "auto") bgVideoIntro.preload = "auto";
     bgVideoIntro.currentTime = 0;
     bgVideoIntro.muted = true;
     const playP = bgVideoIntro.play();
@@ -1587,8 +1596,17 @@ window.closeContactPage = closeContactPage;
 window.triggerContactPhoneAnimation = triggerContactPhoneAnimation;
 window.playWavyCircleTransition = playWavyCircleTransition;
 
-// URL Navigation Shortcuts
-if (urlParams.get("page") === "project") {
+// URL Navigation Shortcuts & Responsive Init
+if (window.innerWidth < 1024) {
+  // Mobile / Small screen mode: cleanly dismiss loading HUD and exit immediately
+  if (loadingScreen) loadingScreen.style.display = "none";
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 1024 && !isStarted) {
+      loadAudioBuffers();
+      startLoadingSequence();
+    }
+  }, { once: true });
+} else if (urlParams.get("page") === "project") {
   if (loadingScreen) loadingScreen.style.display = "none";
   isStarted = true;
   isLoaded = true;

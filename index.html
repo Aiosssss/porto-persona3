@@ -6,10 +6,14 @@
   <title>Persona 3 Reload Pause Menu | Portfolio</title>
   <meta name="description" content="Pixel-perfect recreation of Persona 3 Reload's Pause Menu built with pure HTML, CSS, and JavaScript.">
   <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+  <meta name="theme-color" content="#001233">
+  <link rel="canonical" href="https://aiosssss.github.io/porto-persona3/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=36">
+  <link rel="preload" href="fonts/Rodin Pro EB.otf" as="font" type="font/otf" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap"></noscript>
+  <link rel="stylesheet" href="css/style.css?v=37">
 </head>
 <body>
   <!-- Mobile / Small Screen Notification -->
@@ -48,7 +52,7 @@
       src="assets/bg-intro.mp4"
       muted
       playsinline
-      preload="auto"
+      preload="metadata"
     ></video>
     <video
       id="background-video-loop"
@@ -57,7 +61,7 @@
       loop
       muted
       playsinline
-      preload="auto"
+      preload="none"
     ></video>
 
     <!-- Side Watermark Number (01, 02, etc.) -->
@@ -95,9 +99,9 @@
   </main>
 
   <!-- Preloaded Audio Elements for Instant Zero-Delay Playback -->
-  <audio id="sfx-menu-utama-el" src="sfx/menu-utama.mp3" preload="auto"></audio>
-  <audio id="sfx-navigation-el" src="sfx/navigation.wav" preload="auto"></audio>
-  <audio id="sfx-close-menu-el" src="sfx/close-menu.mp3" preload="auto"></audio>
+  <audio id="sfx-menu-utama-el" src="sfx/menu-utama.mp3" preload="none"></audio>
+  <audio id="sfx-navigation-el" src="sfx/navigation.wav" preload="none"></audio>
+  <audio id="sfx-close-menu-el" src="sfx/close-menu.mp3" preload="none"></audio>
 
   <!-- Circle Page Transition Anchor Container -->
   <div id="wavy-transition-portal" class="wavy-transition-portal" aria-hidden="true" style="display: none;"></div>
@@ -483,6 +487,6 @@
     </div>
   </div>
 
-  <script src="js/main.js?v=35"></script>
+  <script src="js/main.js?v=37" defer></script>
 </body>
 </html>
