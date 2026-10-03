@@ -350,57 +350,58 @@ body.project-screen-active .side-number {
    -------------------------------------------------------------------------- */
 .menu-column {
   position: absolute;
-  top: 67%;
+  top: 55%;
   transform: translateY(-50%);
-  left: 49rem;
+  left: 38rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   pointer-events: auto;
   z-index: 20;
+  will-change: transform;
 }
 
 @media (min-width: 1800px) {
   .menu-column {
-    left: 58rem;
+    left: 46rem;
   }
 }
 
 @media (max-width: 1500px) {
   .menu-column {
-    left: 43rem;
+    left: 33rem;
   }
 }
 
 @media (max-width: 1350px) {
   .menu-column {
-    left: 35rem;
+    left: 26rem;
   }
 }
 
 @media (max-width: 1100px) {
   .menu-column {
-    left: 26rem;
+    left: 18rem;
   }
 }
 
 @media (max-width: 900px) {
   .menu-column {
-    left: 10rem;
+    left: 6rem;
   }
 }
 
 @media (max-height: 860px) {
   .menu-column {
-    transform: translateY(-50%) scale(0.85);
+    transform: translateY(-50%) scale(0.86);
     transform-origin: left center;
   }
 }
 
 @media (max-height: 720px) {
   .menu-column {
-    transform: translateY(-50%) scale(0.72);
+    transform: translateY(-50%) scale(0.74);
     transform-origin: left center;
   }
 }
@@ -467,6 +468,7 @@ body.project-screen-active .side-number {
   opacity: 0;
   transform: translateX(110px) skewX(-8deg);
   transition: z-index 0s linear;
+  will-change: transform, opacity;
 }
 
 .option-item:first-of-type {
@@ -519,18 +521,15 @@ body.project-screen-active .side-number {
 @keyframes p3rMenuEntrance {
   0% {
     opacity: 0;
-    transform: translateX(120px) skewX(-12deg) scale(0.96);
-    filter: blur(4px);
+    transform: translateX(100px) skewX(-10deg) scale(0.96);
   }
   70% {
     opacity: 1;
-    transform: translateX(-8px) skewX(2deg) scale(1.02);
-    filter: blur(0);
+    transform: translateX(-6px) skewX(2deg) scale(1.01);
   }
   100% {
     opacity: 1;
     transform: translateX(0) skewX(0) scale(1);
-    filter: blur(0);
   }
 }
 
@@ -722,8 +721,8 @@ body.project-screen-active .side-number {
 .portfolio-modal {
   position: fixed;
   inset: 0;
-  background-color: rgba(3, 31, 100, 0.75);
-  backdrop-filter: blur(12px);
+  background-color: rgba(3, 20, 70, 0.88);
+  backdrop-filter: blur(6px);
   z-index: 300;
   display: none;
   justify-content: center;
@@ -1025,17 +1024,14 @@ body.project-screen-active .side-number {
   0% {
     opacity: 0;
     transform: translateX(-150px) rotate(-4.2deg);
-    filter: blur(8px);
   }
   68% {
     opacity: 1;
     transform: translateX(12px) rotate(-4.2deg);
-    filter: blur(0);
   }
   100% {
     opacity: 1;
     transform: translateX(0) rotate(-4.2deg);
-    filter: blur(0);
   }
 }
 
@@ -1140,17 +1136,14 @@ body.project-screen-active .side-number {
   0% {
     opacity: 0;
     transform: skewX(var(--card-skew, -22deg)) translateX(-140px);
-    filter: blur(5px);
   }
   70% {
     opacity: 1;
     transform: skewX(var(--card-skew, -22deg)) translateX(10px);
-    filter: blur(0);
   }
   100% {
     opacity: 1;
     transform: skewX(var(--card-skew, -22deg)) translateX(0px);
-    filter: blur(0);
   }
 }
 

@@ -306,7 +306,7 @@ function getAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
+      audioCtx = new AudioContextClass({ latencyHint: "interactive" });
     }
   }
   if (audioCtx && audioCtx.state === "suspended") {
@@ -315,8 +315,8 @@ function getAudioContext() {
   return audioCtx;
 }
 
-// Pre-create fallback HTMLAudioElement pools
-for (let i = 0; i < SFX_POOL_SIZE; i++) {
+// Pre-create light fallback HTMLAudioElement pools
+for (let i = 0; i < 2; i++) {
   const a = new Audio("sfx/navigation.wav");
   a.preload = "auto";
   a.volume = 0.6;
@@ -491,8 +491,11 @@ async function unlockAudioEngine() {
 const selectorPath = "M 24.853754, 93.31573 135.14625, 49.684266 114.14751, 97.331142 Z";
 const selectorBackgroundPath = "M 12.7428765,95.50088 144.25712,47.499123 116.75625,95.465764 Z";
 
+let cachedOptionItems = [];
+
 function renderOptions() {
   optionsList.innerHTML = "";
+  cachedOptionItems = [];
 
   options.forEach((opt, index) => {
     const colorClass = colors[(index + 2) % colors.length];
@@ -584,11 +587,12 @@ function renderOptions() {
     });
 
     optionsList.appendChild(item);
+    cachedOptionItems.push(item);
   });
 }
 
 function setIndex(index) {
-  if (index === selectedIndex && optionsList.children.length > 0) return;
+  if (index === selectedIndex && cachedOptionItems.length > 0) return;
   selectedIndex = index;
 
   playSFX();
@@ -597,8 +601,14 @@ function setIndex(index) {
     sideNumber.textContent = (selectedIndex + 1).toString().padStart(2, "0");
   }
 
-  const items = optionsList.querySelectorAll(".option-item");
-  items.forEach((item, idx) => {
+  // Speculatively preload the selected subpage's video just in time
+  if (index === 0 && slinkBgVideo && slinkBgVideo.preload !== "auto") slinkBgVideo.preload = "auto";
+  else if (index === 1 && skillBgVideo && skillBgVideo.preload !== "auto") skillBgVideo.preload = "auto";
+  else if (index === 2 && aboutBgVideo && aboutBgVideo.preload !== "auto") aboutBgVideo.preload = "auto";
+  else if (index === 3 && contactBgVideo && contactBgVideo.preload !== "auto") contactBgVideo.preload = "auto";
+
+  for (let idx = 0; idx < cachedOptionItems.length; idx++) {
+    const item = cachedOptionItems[idx];
     if (idx === selectedIndex) {
       item.classList.add("selected");
       item.style.zIndex = 15;
@@ -606,7 +616,7 @@ function setIndex(index) {
       item.classList.remove("selected");
       item.style.zIndex = options[idx].zIndex;
     }
-  });
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -616,7 +626,7 @@ function generateWavyPolygon(
   cx, 
   cy, 
   r, 
-  numPoints = 120, 
+  numPoints = 72, 
   waves1 = 7, 
   amp1 = 0.085, 
   waves2 = 14, 
@@ -630,8 +640,9 @@ function generateWavyPolygon(
     return `polygon(${new Array(numPoints).fill(pt).join(", ")})`;
   }
   const points = [];
+  const step = (2 * Math.PI) / numPoints;
   for (let i = 0; i < numPoints; i++) {
-    const theta = (2 * Math.PI * i) / numPoints;
+    const theta = i * step;
     const wave = 1.0 + amp1 * Math.sin(waves1 * theta + phase) + amp2 * Math.cos(waves2 * theta + phase * 1.6);
     const px = cx + r * wave * Math.cos(theta) * scaleX;
     const py = cy + r * wave * Math.sin(theta) * scaleY;
@@ -649,7 +660,7 @@ function calculateTargetRadius(origin) {
 }
 
 // Universal Origin Locators
-function getOptionCenter(optionIndex, clickEvent, fallbackXRatio = 0.65, fallbackYRatio = 0.45) {
+function getOptionCenter(optionIndex, clickEvent, fallbackXRatio = 0.56, fallbackYRatio = 0.48) {
   if (clickEvent && typeof clickEvent.clientX === "number" && (clickEvent.clientX > 0 || clickEvent.clientY > 0)) {
     return { x: clickEvent.clientX, y: clickEvent.clientY };
   }
@@ -698,11 +709,11 @@ function getExitOrigin(buttonElOrId, fallbackX, fallbackY) {
   };
 }
 
-// Named Aliases for Backward Compatibility & Direct Script Control
-const getProjectOptionCenter = (evt) => getOptionCenter(0, evt, 0.70, 0.35);
-const getSkillOptionCenter   = (evt) => getOptionCenter(1, evt, 0.65, 0.45);
-const getAboutOptionCenter   = (evt) => getOptionCenter(2, evt, 0.65, 0.55);
-const getContactOptionCenter = (evt) => getOptionCenter(3, evt, 0.60, 0.65);
+// Named Aliases for Backward Compatibility & Direct Script Control (Updated for centered menu)
+const getProjectOptionCenter = (evt) => getOptionCenter(0, evt, 0.58, 0.38);
+const getSkillOptionCenter   = (evt) => getOptionCenter(1, evt, 0.56, 0.48);
+const getAboutOptionCenter   = (evt) => getOptionCenter(2, evt, 0.55, 0.57);
+const getContactOptionCenter = (evt) => getOptionCenter(3, evt, 0.54, 0.66);
 
 const getProjectExitOrigin = () => getExitOrigin(slinkBackBtn, window.innerWidth - 120, window.innerHeight - 55);
 const getSkillExitOrigin   = () => getExitOrigin(skillBackBtn, window.innerWidth - 120, window.innerHeight - 55);
@@ -717,7 +728,7 @@ function executeWavyReveal({
   videoEl,
   onStart,
   onComplete,
-  duration = 820,
+  duration = 520,
   easing = "cubic-bezier(0.2, 1, 0.35, 1)"
 }) {
   if (!pageEl) {
@@ -735,6 +746,11 @@ function executeWavyReveal({
   pageEl.classList.add("circle-transitioning");
   pageEl.setAttribute("aria-hidden", "false");
 
+  // Pause main menu background video while subpage is displayed to eliminate dual-video GPU decode load
+  if (bgVideoLoop && !bgVideoLoop.paused) {
+    bgVideoLoop.pause();
+  }
+
   if (videoEl) {
     videoEl.currentTime = 0;
     videoEl.muted = true;
@@ -743,18 +759,18 @@ function executeWavyReveal({
 
   const anim = pageEl.animate([
     { 
-      clipPath: generateWavyPolygon(origin.x, origin.y, 0, 120, 7, 0.085, 14, 0.035, 0.0, 1.25, 1.05) 
+      clipPath: generateWavyPolygon(origin.x, origin.y, 0, 72, 7, 0.085, 14, 0.035, 0.0, 1.25, 1.05) 
     },
     { 
-      clipPath: generateWavyPolygon(origin.x + 22, origin.y - 12, targetRadius * 0.45, 120, 7, 0.09, 14, 0.035, 1.2, 1.25, 1.05),
+      clipPath: generateWavyPolygon(origin.x + 22, origin.y - 12, targetRadius * 0.45, 72, 7, 0.09, 14, 0.035, 1.2, 1.25, 1.05),
       offset: 0.38
     },
     { 
-      clipPath: generateWavyPolygon(origin.x + 10, origin.y - 5, targetRadius * 0.85, 120, 7, 0.075, 14, 0.025, 2.2, 1.20, 1.05),
+      clipPath: generateWavyPolygon(origin.x + 10, origin.y - 5, targetRadius * 0.85, 72, 7, 0.075, 14, 0.025, 2.2, 1.20, 1.05),
       offset: 0.70
     },
     { 
-      clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 120, 7, 0.05, 14, 0.015, 3.4, 1.15, 1.02) 
+      clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 72, 7, 0.05, 14, 0.015, 3.4, 1.15, 1.02) 
     }
   ], {
     duration,
@@ -779,7 +795,7 @@ function executeWavyClose({
   bodyClass,
   videoEl,
   onComplete,
-  duration = 780,
+  duration = 480,
   easing = "cubic-bezier(0.16, 1, 0.3, 1)"
 }) {
   playCloseMenuSFX();
@@ -800,18 +816,18 @@ function executeWavyClose({
 
   const anim = pageEl.animate([
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, targetRadius, 120, 9, 0.07, 18, 0.025, 0.0, 1.15, 1.25) 
+      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, targetRadius, 72, 9, 0.07, 18, 0.025, 0.0, 1.15, 1.25) 
     },
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x - 20, exitOrigin.y - 12, targetRadius * 0.80, 120, 9, 0.08, 18, 0.03, 1.0, 1.15, 1.25),
+      clipPath: generateWavyPolygon(exitOrigin.x - 20, exitOrigin.y - 12, targetRadius * 0.80, 72, 9, 0.08, 18, 0.03, 1.0, 1.15, 1.25),
       offset: 0.32
     },
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x - 28, exitOrigin.y - 18, targetRadius * 0.42, 120, 9, 0.085, 18, 0.03, 2.0, 1.15, 1.25),
+      clipPath: generateWavyPolygon(exitOrigin.x - 28, exitOrigin.y - 18, targetRadius * 0.42, 72, 9, 0.085, 18, 0.03, 2.0, 1.15, 1.25),
       offset: 0.65
     },
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, 0, 120, 9, 0.08, 18, 0.025, 3.0, 1.15, 1.25) 
+      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, 0, 72, 9, 0.08, 18, 0.025, 3.0, 1.15, 1.25) 
     }
   ], {
     duration,
@@ -824,6 +840,10 @@ function executeWavyClose({
     pageEl.style.clipPath = "";
     pageEl.setAttribute("aria-hidden", "true");
     if (videoEl) videoEl.pause();
+    // Resume main menu loop video seamlessly
+    if (bgVideoLoop && bgVideoLoop.paused) {
+      bgVideoLoop.play().catch(() => {});
+    }
     try { anim.cancel(); } catch (_) {}
     isWavyTransitionRunning = false;
     if (onComplete) onComplete();
@@ -1332,19 +1352,21 @@ function updateProgressUI(val) {
 
 function runProgressTicker() {
   return new Promise((resolve) => {
-    progressTimer = setInterval(() => {
+    function tick() {
       if (currentProgress < targetProgress) {
-        const step = Math.max(1, Math.ceil((targetProgress - currentProgress) / 5));
+        const step = Math.max(1, Math.ceil((targetProgress - currentProgress) * 0.35));
         currentProgress = Math.min(targetProgress, currentProgress + step);
         updateProgressUI(currentProgress);
       }
 
       if (currentProgress >= 100) {
-        clearInterval(progressTimer);
         updateProgressUI(100);
         resolve();
+      } else {
+        requestAnimationFrame(tick);
       }
-    }, 20);
+    }
+    requestAnimationFrame(tick);
   });
 }
 
@@ -1360,16 +1382,15 @@ async function startLoadingSequence() {
     bgVideoLoop.defaultMuted = true;
   }
 
-  // Preload audio and fonts smoothly
+  // Preload audio and fonts with minimal latency
   loadAudioBuffers();
-  setProgress(45);
-  setTimeout(() => setProgress(85), 100);
+  setProgress(55);
 
   try {
     if (document.fonts && document.fonts.ready) {
       await Promise.race([
         document.fonts.ready,
-        new Promise((r) => setTimeout(r, 200))
+        new Promise((r) => setTimeout(r, 120))
       ]);
     }
   } catch (_) {}
@@ -1379,7 +1400,7 @@ async function startLoadingSequence() {
   updateProgressUI(100);
   isLoaded = true;
 
-  await new Promise((r) => setTimeout(r, 220));
+  await new Promise((r) => setTimeout(r, 60));
 
   const ctx = getAudioContext();
   if (ctx && ctx.state !== "running") {
